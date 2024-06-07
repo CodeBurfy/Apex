@@ -50,4 +50,9 @@ export class ContactService {
             .pipe(catchError(ContactService.handleError));
     }
 
+    deleteContact(contact: Contact) {
+      return this.http.delete<Contact>(this.serverUrl + '/' +contact.id)
+        .pipe(catchError(ContactService.handleError))
+    }
+
 }

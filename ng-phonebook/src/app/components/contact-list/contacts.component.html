@@ -1,4 +1,17 @@
-<app-contact-form></app-contact-form>
+<app-contact-form [tobeUpdatedContact]="tobeUpdatedContact" [events]="eventsSubject.asObservable()"
+(forParent)="showRecent($event)"
+></app-contact-form>
 <div *ngFor="let contact of this.contacts">
-  {{contact.firstName}}, {{contact.lastName}}, {{contact.email}}
+
+
+
+
+
+
+  {{contact.firstName}}, {{contact.lastName}}, {{contact.email}},
+  <button (click)="onUpdate(contact)" class="btn btn-success" >Update</button>,
+  <button (click)="onDelete(contact)" class="btn btn-success" >Delete</button>,
+
 </div>
+
+

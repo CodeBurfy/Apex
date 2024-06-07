@@ -17,7 +17,7 @@ const urls = [
         method: 'POST',
         getData: (request, id) => {
             request.body.id = storage.data.length + 1;
-            // storage.data.push(request.body)
+            storage.data.push(request.body)
             return request.body
         }
     }, {
@@ -35,7 +35,20 @@ const urls = [
 
             return foundItem
         }
-    }
+    },
+    {
+      url: "http://localhost:8080/api/contact/#",
+      method: 'DELETE',
+      deleteData: (request, id) => {
+          //let foundItem = storage.data.filter(item => item.id+"" === id)[0];
+          console.log('before  deletion', storage.data,id, storage.data.filter(item => item.id+""== id)[0].id);
+           const idx = storage.data.indexOf(storage.data.filter(item => item.id+""== id)[0].id);
+           storage.data.splice(idx, 1);
+           console.log('after deletion', storage.data);
+           return storage.data;
+
+      }
+  }
 ];
 
 @Injectable()
@@ -47,20 +60,27 @@ export class HttpMockRequestInterceptor implements HttpInterceptor {
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         for (const element of urls) {
 
-            if (request.method == element.method) {
-                if (request.url === element.url) {
-                    return of(new HttpResponse({status: 200, body: element.getData(request, null)}));
-                } else {
+          if (request.method == element.method) {
+            if(request.method === 'DELETE') {
+              let url = new URL(request.url);
+              let id = url.pathname.replace("/api/contact/", "")
+              if (id && url.origin + "/api/contact/#" === element.url ) {
+                  return of(new HttpResponse({status: 200, body: element.deleteData(request, id)}));
+              }
+            }
+            else if (request.url === element.url) {
+                return of(new HttpResponse({status: 200, body: element.getData(request, null)}));
+            } else {
 
-                    let url = new URL(request.url);
-                    let id = url.pathname.replace("/api/contact/", "")
-                    if (id && url.origin + "/api/contact/#" === element.url ) {
-                        return of(new HttpResponse({status: 200, body: element.getData(request, id)}));
-                    }
+                let url = new URL(request.url);
+                let id = url.pathname.replace("/api/contact/", "")
+                if (id && url.origin + "/api/contact/#" === element.url ) {
+                    return of(new HttpResponse({status: 200, body: element.getData(request, id)}));
                 }
             }
+          }
 
-            console.log("Unable to find the path", request.url, request.method)
+          console.log("Unable to find the path", request.url, request.method)
         }
 
         return next.handle(request);
